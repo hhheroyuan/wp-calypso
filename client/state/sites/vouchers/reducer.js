@@ -7,6 +7,7 @@ import { combineReducers } from 'redux';
  * Internal dependencies
  */
 import {
+	SITE_VOUCHERS_ASSIGN,
 	SITE_VOUCHERS_RECEIVE,
 	SITE_VOUCHERS_REQUEST,
 	SITE_VOUCHERS_REQUEST_SUCCESS,
@@ -14,6 +15,10 @@ import {
 	SERIALIZE,
 	DESERIALIZE
 } from 'state/action-types';
+
+import {
+	GOOGLE_AD_CREDITS
+} from './service-types';
 
 import { isValidStateWithSchema } from 'state/utils';
 import { itemsSchema } from './schema';
@@ -28,6 +33,28 @@ import { itemsSchema } from './schema';
 export const items = ( state = {}, action ) => {
 	const { siteId } = action;
 	switch ( action.type ) {
+		case SITE_VOUCHERS_ASSIGN:
+			switch ( action.serviceType ) {
+				case GOOGLE_AD_CREDITS:
+					const currentVouchers = state[ siteId ]
+						? ( state[ siteId ][ GOOGLE_AD_CREDITS ] || [] )
+						: [];
+
+					const vouchers = currentVouchers.splice( 0 );
+					vouchers.push( action.voucher );
+
+					return Object.assign(
+						{},
+						state,
+						{
+							[ siteId ]: Object.assign(
+								{},
+								{ [ GOOGLE_AD_CREDITS ]: vouchers }
+							)
+						}
+					);
+			}
+
 		case SITE_VOUCHERS_RECEIVE:
 			return Object.assign(
 				{},

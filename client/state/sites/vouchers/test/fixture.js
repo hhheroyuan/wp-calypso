@@ -2,6 +2,8 @@ export const SITE_ID_0 = 2916284;
 export const SITE_ID_1 = 77203074;
 export const USER_ID = 73705554;
 
+import { GOOGLE_AD_CREDITS as googleAdCredits } from '../service-types';
+
 export const GOOGLE_VOUCHER_0 = {
 	assigned: new Date().toISOString(),
 	assigned_by: USER_ID,
@@ -41,6 +43,16 @@ export const REST_API_RESPONSE = {
 		Date: new Date().toGMTString()
 	},
 	vouchers: GOOGLE_AD_CREDITS
+};
+
+// WP RESP-API POST response - assign a google-ad-credits voucher
+export const REST_API_ASSIGN_GOOGLE_VOUCHER_RESPONSE = {
+	headers: {
+		'Content-Type': 'application/json',
+		Date: new Date().toGMTString()
+	},
+	service_type: googleAdCredits,
+	voucher: GOOGLE_VOUCHER_0
 };
 
 // WP RESP-API response

@@ -17,6 +17,7 @@ import vouchersReducer, {
  * Action types
  */
 import {
+	SITE_VOUCHERS_ASSIGN,
 	SITE_VOUCHERS_RECEIVE,
 	SITE_VOUCHERS_REQUEST,
 	SITE_VOUCHERS_REQUEST_SUCCESS,
@@ -24,12 +25,21 @@ import {
 } from 'state/action-types';
 
 /**
+ * Service types
+ */
+import {
+	GOOGLE_AD_CREDITS as googleAdCredits
+} from '../service-types';
+
+/**
  * Fixture
  */
 import {
 	SITE_ID_0 as firstSiteId,
 	SITE_ID_1 as secondSiteId,
-	GOOGLE_CREDITS as googleAdCredits,
+	GOOGLE_VOUCHER_0 as firstGoogleVoucher,
+	GOOGLE_VOUCHER_1 as secondGoogleVoucher,
+	GOOGLE_CREDITS as googleAdCreditsArray,
 	GOOGLE_AD_CREDITS_0 as firstGoogleAdCredits,
 	GOOGLE_AD_CREDITS_1 as secondGoogleAdCredits,
 	ERROR_MESSAGE_RESPONSE as errorMessageResponse
@@ -63,12 +73,12 @@ describe( 'reducer', () => {
 			const action = {
 				type: SITE_VOUCHERS_RECEIVE,
 				siteId: firstSiteId,
-				vouchers: googleAdCredits
+				vouchers: googleAdCreditsArray
 			};
 			const newState = itemsReducer( initialState, action );
 
 			const expectedState = {
-				[ firstSiteId ]: googleAdCredits
+				[ firstSiteId ]: googleAdCreditsArray
 			};
 
 			deepFreeze( action );
@@ -78,7 +88,7 @@ describe( 'reducer', () => {
 
 		it( 'should override vouchers for same site', () => {
 			const initialState = {
-				[ firstSiteId ]: googleAdCredits
+				[ firstSiteId ]: googleAdCreditsArray
 			};
 			const action = {
 				type: SITE_VOUCHERS_RECEIVE,
@@ -108,6 +118,55 @@ describe( 'reducer', () => {
 			const expectedState = {
 				[ firstSiteId ]: firstGoogleAdCredits,
 				[ secondSiteId ]: secondGoogleAdCredits
+			};
+
+			deepFreeze( initialState );
+			deepFreeze( action );
+
+			expect( newState ).to.eql( expectedState );
+		} );
+
+		it( 'should add google-ad-credits voucher - initial state: undefined', () => {
+			const initialState = undefined;
+			const action = {
+				type: SITE_VOUCHERS_ASSIGN,
+				siteId: firstSiteId,
+				serviceType: googleAdCredits,
+				voucher: firstGoogleVoucher
+			};
+			const newState = itemsReducer( initialState, action );
+			const expectedState = {
+				[ firstSiteId ]: {
+					[ googleAdCredits ]: [ firstGoogleVoucher ]
+				}
+			};
+
+			deepFreeze( action );
+
+			expect( newState ).to.eql( expectedState );
+		} );
+
+		it( 'should accumulate google-ad-credits voucher', () => {
+			const initialState = {
+				[ firstSiteId ]: {
+					[ googleAdCredits ]: [ firstGoogleVoucher ]
+				}
+			};
+			const action = {
+				type: SITE_VOUCHERS_ASSIGN,
+				siteId: firstSiteId,
+				serviceType: googleAdCredits,
+				voucher: secondGoogleVoucher
+			};
+			const newState = itemsReducer( initialState, action );
+
+			const expectedState = {
+				[ firstSiteId ]: {
+					[ googleAdCredits ]: [
+						firstGoogleVoucher,
+						secondGoogleVoucher
+					]
+				}
 			};
 
 			deepFreeze( initialState );

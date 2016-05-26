@@ -8,6 +8,7 @@ import nock from 'nock';
  * Action types
  */
 import {
+	SITE_VOUCHERS_ASSIGN,
 	SITE_VOUCHERS_RECEIVE,
 	SITE_VOUCHERS_REQUEST,
 	SITE_VOUCHERS_REQUEST_SUCCESS,
@@ -15,13 +16,20 @@ import {
 } from 'state/action-types';
 
 /**
+ * Services types
+ */
+import { GOOGLE_AD_CREDITS as googleAdCredits } from '../service-types';
+
+/**
  * Actions
  */
 import {
+	vouchersAssignAction,
 	vouchersReceiveAction,
 	vouchersRequestAction,
 	vouchersRequestSuccessAction,
 	vouchersRequestFailureAction,
+	assignSiteVoucher,
 	requestSiteVouchers
 } from '../actions';
 
@@ -33,6 +41,7 @@ import { useSandbox } from 'test/helpers/use-sinon';
 import {
 	SITE_ID_0 as siteId,
 	REST_API_RESPONSE as wpcomResponse,
+	REST_API_ASSIGN_GOOGLE_VOUCHER_RESPONSE as wpcomAssignResponse,
 	REST_API_ERROR_RESPONSE as wpcomErrorResponse,
 	ERROR_RESPONSE as errorResponse,
 } from './fixture';
@@ -47,12 +56,24 @@ describe( 'actions', () => {
 
 	describe( 'Actions creators', () => {
 		it( '#vouchersReceiveAction()', () => {
-			const { vouchers } = wpcomResponse;
+			const { vouchers } = wpcomAssignResponse;
 			const action = vouchersReceiveAction( siteId, vouchers );
 			expect( action ).to.eql( {
 				type: SITE_VOUCHERS_RECEIVE,
 				siteId,
 				vouchers
+			} );
+		} );
+
+		it( '#vouchersAssignAction() - google-ad-credits', () => {
+			const { voucher } = wpcomResponse;
+
+			const action = vouchersAssignAction( siteId, googleAdCredits, voucher );
+			expect( action ).to.eql( {
+				type: SITE_VOUCHERS_ASSIGN,
+				siteId,
+				serviceType: googleAdCredits,
+				voucher
 			} );
 		} );
 
@@ -105,6 +126,28 @@ describe( 'actions', () => {
 			const action = vouchersReceiveAction( siteId, vouchers );
 
 			return requestSiteVouchers( siteId )( spy ).then( () => {
+				expect( spy ).to.have.been.calledWith( action );
+			} );
+		} );
+	} );
+
+	describe( '#assignSiteVoucher() - google-ad-credits - success', () => {
+		before( () => {
+			nock( 'https://public-api.wordpress.com:443' )
+				.persist()
+				.post( `/wpcom/v2/sites/${ siteId }/vouchers/${ googleAdCredits }/assign` )
+				.reply( 200, wpcomAssignResponse );
+		} );
+
+		after( () => {
+			nock.cleanAll();
+		} );
+
+		it( 'should dispatch RECEIVE action when request completes', () => {
+			const { voucher } = wpcomAssignResponse;
+			const action = vouchersAssignAction( siteId, googleAdCredits, voucher );
+
+			return assignSiteVoucher( siteId, googleAdCredits )( spy ).then( () => {
 				expect( spy ).to.have.been.calledWith( action );
 			} );
 		} );

@@ -3,6 +3,7 @@
  */
 import wpcom from 'lib/wp';
 import {
+	SITE_VOUCHERS_ASSIGN,
 	SITE_VOUCHERS_RECEIVE,
 	SITE_VOUCHERS_REQUEST,
 	SITE_VOUCHERS_REQUEST_SUCCESS,
@@ -25,6 +26,15 @@ export const vouchersReceiveAction = ( siteId, vouchers ) => {
 		type: SITE_VOUCHERS_RECEIVE,
 		siteId,
 		vouchers
+	};
+};
+
+export const vouchersAssignAction = ( siteId, serviceType, voucher ) => {
+	return {
+		type: SITE_VOUCHERS_ASSIGN,
+		siteId,
+		serviceType,
+		voucher
 	};
 };
 
@@ -93,6 +103,36 @@ export function requestSiteVouchers( siteId ) {
 				const { vouchers = [] } = data;
 				dispatch( vouchersRequestSuccessAction( siteId ) );
 				dispatch( vouchersReceiveAction( siteId, vouchers ) );
+			} )
+			.catch( error => {
+				const message = error instanceof Error
+					? error.message
+					: error;
+
+				dispatch( vouchersRequestFailureAction( siteId, message ) );
+			} );
+	};
+}
+
+/**
+ * Assign a voucher to the given site.
+ *
+ * @param {Number} siteId - identifier of the site
+ * @param {String} serviceType - service type
+ * @returns {Function} a promise that will resolve once fetching is completed
+ */
+export function assignSiteVoucher( siteId, serviceType ) {
+	return dispatch => {
+		dispatch( vouchersRequestAction( siteId ) );
+
+		return wpcom
+			.site( siteId )
+			.adCreditVouchers()
+			.assign( serviceType )
+			.then( data => {
+				const { voucher = {} } = data;
+				dispatch( vouchersRequestSuccessAction( siteId ) );
+				dispatch( vouchersAssignAction( siteId, serviceType, voucher ) );
 			} )
 			.catch( error => {
 				const message = error instanceof Error
