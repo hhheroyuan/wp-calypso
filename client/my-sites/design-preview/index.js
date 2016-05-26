@@ -7,11 +7,13 @@ import { connect } from 'react-redux';
 import noop from 'lodash/noop';
 import debugFactory from 'debug';
 import url from 'url';
+import startsWith from 'lodash/startsWith';
 
 /**
  * Internal dependencies
  */
 import config from 'config';
+import { isHttps } from 'lib/url';
 import WebPreview from 'components/web-preview';
 import * as PreviewActions from 'state/preview/actions';
 import accept from 'lib/accept';
@@ -186,7 +188,7 @@ const DesignPreview = React.createClass( {
 	render() {
 		const useEndpoint = config.isEnabled( 'preview-endpoint' );
 
-		if ( ! this.props.selectedSite ) {
+		if ( ! this.props.selectedSite || ! isHttps( this.props.selectedSite.URL ) ) {
 			return null;
 		}
 

@@ -14,6 +14,7 @@ import Gridicon from 'components/gridicon';
 import SiteIndicator from 'my-sites/site-indicator';
 import { getCustomizeUrl } from 'my-sites/themes/helpers';
 import sitesList from 'lib/sites-list';
+import { isHttps } from 'lib/url';
 import { userCan } from 'lib/site/utils';
 import Tooltip from 'components/tooltip';
 import ExternalLink from 'components/external-link';
@@ -227,7 +228,7 @@ export default React.createClass( {
 							onClick={ this.props.onClick }
 							onMouseEnter={ this.props.onMouseEnter }
 							onMouseLeave={ this.props.onMouseLeave }
-							aria-label={ this.props.homeLink && config.isEnabled( 'preview-layout' )
+							aria-label={ isHttps( this.props.homeLink ) && config.isEnabled( 'preview-layout' )
 								? this.translate( 'Open site %(domain)s in a preview', {
 									args: { domain: site.domain }
 								} )

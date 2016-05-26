@@ -34,6 +34,7 @@ import SidebarFooter from 'layout/sidebar/footer';
 import DraftsButton from 'post-editor/drafts-button';
 import Tooltip from 'components/tooltip';
 import { isPremium, isBusiness } from 'lib/products-values';
+import { isHttps } from 'lib/url';
 
 module.exports = React.createClass( {
 	displayName: 'MySitesSidebar',
@@ -54,7 +55,8 @@ module.exports = React.createClass( {
 	},
 
 	onPreviewSite( event ) {
-		if ( config.isEnabled( 'preview-layout' ) ) {
+		const site = this.getSelectedSite();
+		if ( config.isEnabled( 'preview-layout' ) && isHttps( site.URL ) ) {
 			event.preventDefault();
 			this.props.layoutFocus.set( 'preview' );
 		}
